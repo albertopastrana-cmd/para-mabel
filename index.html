@@ -472,17 +472,10 @@
     .yt-modal { position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 300ms; }
     .yt-modal.open { opacity:1;pointer-events:all; }
     .yt-modal-inner { position:relative;width:min(960px,96vw);aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,.9); }
-    /* ── Video modal ───────────────────────────────────────────── */
     #netflix-player { position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain;background:#000; }
-    /* Botones con position:fixed — salen del contexto del <video>, unico fix iOS */
-    #close-player { position:fixed !important;top:14px;right:14px;z-index:9999999 !important;pointer-events:auto !important;width:40px;height:40px;border-radius:50%;background:rgba(10,18,28,.9);border:1.5px solid rgba(255,255,255,.25);color:#fff;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;opacity:0;transition:background 150ms,opacity 300ms; }
-    #close-player.nf-visible { display:flex;opacity:1; }
+    #close-player { display:none;position:absolute;top:20px;right:20px;z-index:999999;pointer-events:auto;cursor:pointer;width:44px;height:44px;border-radius:50%;background:rgba(10,18,28,.9);border:1.5px solid rgba(255,255,255,.25);color:#fff;font-size:20px;align-items:center;justify-content:center;transition:background 150ms; }
+    .yt-modal.open #close-player { display:flex; }
     #close-player:hover, #close-player:active { background:rgba(220,30,30,.85); }
-    .nf-top-controls { position:fixed !important;top:14px;left:14px;z-index:9999999 !important;pointer-events:none;display:none;align-items:center;gap:8px;opacity:0;transition:opacity 300ms; }
-    .nf-top-controls.nf-visible { display:flex;opacity:1; }
-    .nf-seek-btn, .nf-speed { pointer-events:auto !important;z-index:9999999 !important;background:rgba(10,18,28,.85);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:inherit;font-size:13px;font-weight:700;padding:7px 13px;border-radius:9px;cursor:pointer;outline:none;transition:background 140ms; }
-    .nf-seek-btn:hover,.nf-seek-btn:active,.nf-speed:hover,.nf-speed:active { background:rgba(134,152,170,.4); }
-    .nf-speed option { background:#0D1A2A; }
     /* Play overlay on video cards */
     .card-yt-badge { position:absolute;bottom:8px;left:8px;background:rgba(10,18,28,.75);backdrop-filter:blur(8px);border:1px solid rgba(134,152,170,.3);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:#8698AA;letter-spacing:.06em;pointer-events:none; }
     .card-yt-play-overlay { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);opacity:0;transition:opacity 200ms;border-radius:inherit;cursor:pointer; }
@@ -2295,39 +2288,11 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-/* ── RESTORE ON LOAD ────────────────────────────────────────────── */
+/* RESTORE ON LOAD */
 (function restoreNav(){
-  /* Validar timeout antes de cualquier otra cosa */
-  try{
-    const lastActive = parseInt(localStorage.getItem(LAST_ACTIVE_KEY)||'0', 10);
-    if(lastActive && (Date.now() - lastActive) >= SESSION_TIMEOUT){
-      saveNavSession({ isAuthenticated:false, profile:null });
-      localStorage.removeItem(LAST_ACTIVE_KEY);
-    }
-  }catch{}
-
-  const sess = getNavSession();
-
-  /* REGLA ESTRICTA: si isAuthenticated no es exactamente true → lock screen siempre */
-  if(!sess || sess.isAuthenticated !== true){
-    _showScreen('lock-screen');
-    history.replaceState({ screen: 'lock-screen' }, '');
-    return;
-  }
-
-  /* Autenticado con perfil ya elegido → catálogo directo */
-  if(sess.profile){
-    currentUser   = sess.profile;
-    isCreatorMode = sess.profile === 'alberto';
-    _showScreen('catalog-screen');
-    history.replaceState({ screen: 'catalog-screen' }, '');
-    setTimeout(initCatalog, 300);
-    return;
-  }
-
-  /* Autenticado pero sin perfil → selector de perfiles */
-  _showScreen('profile-screen');
-  history.replaceState({ screen: 'profile-screen' }, '');
+  /* Siempre iniciar desde lock-screen */
+  _showScreen('lock-screen');
+  history.replaceState({ screen: 'lock-screen' }, '');
 })();
 
 function initCatalog(){
@@ -4753,82 +4718,40 @@ document.getElementById('np-close').addEventListener('click', () => {
   document.addEventListener('touchend',  onEnd);
 })();
 
-/* ── HTML5 VIDEO PLAYER ─────────────────────────────────────────── */
-function _getVid(){ return document.getElementById('netflix-player'); }
-
-let _nfHideTimer = null;
-
-function _nfShowControls(){
-  const c = document.getElementById('close-player');
-  const t = document.getElementById('nf-top-controls');
-  if(c) c.classList.add('nf-visible');
-  if(t) t.classList.add('nf-visible');
-  clearTimeout(_nfHideTimer);
-  _nfHideTimer = setTimeout(_nfHideControls, 3000);
-}
-
-function _nfHideControls(){
-  const c = document.getElementById('close-player');
-  const t = document.getElementById('nf-top-controls');
-  if(c) c.classList.remove('nf-visible');
-  if(t) t.classList.remove('nf-visible');
-}
-
+/* HTML5 VIDEO PLAYER */
 function openVideoModal(videoUrl, title){
-  const modal = document.getElementById('yt-modal');
-  const vid   = _getVid();
+  var modal = document.getElementById('yt-modal');
+  var vid   = document.getElementById('netflix-player');
   if(!modal || !vid) return;
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
   vid.src = videoUrl;
   vid.load();
-  vid.play().catch(()=>{});
-  _nfShowControls();
+  vid.play().catch(function(){});
 }
 
 function openYTModal(id, title){ openVideoModal(id, title); }
 
 function closeYTModal(){
-  const vid = _getVid();
+  var vid = document.getElementById('netflix-player');
   if(vid){ vid.pause(); vid.removeAttribute('src'); vid.load(); }
-  const modal = document.getElementById('yt-modal');
+  var modal = document.getElementById('yt-modal');
   if(modal) modal.classList.remove('open');
   document.body.style.overflow = '';
-  _nfHideControls();
-  clearTimeout(_nfHideTimer);
 }
 
-/* Botones fixed — fuera del <video>, siempre reciben clics */
-setTimeout(()=>{
-  const vid      = _getVid();
-  const closeBtn = document.getElementById('close-player');
-  const btnBack  = document.getElementById('nf-back10');
-  const btnFwd   = document.getElementById('nf-fwd10');
-  const selSpeed = document.getElementById('nf-speed');
-  const ytMod    = document.getElementById('yt-modal');
+document.getElementById('close-player').addEventListener('click', function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  closeYTModal();
+});
 
-  /* X — cierra con stopPropagation para que no llegue al video */
-  if(closeBtn) closeBtn.addEventListener('click', e=>{
-    e.stopPropagation();
-    closeYTModal();
-  });
+document.getElementById('yt-modal').addEventListener('click', function(e){
+  if(e.target === document.getElementById('yt-modal')) closeYTModal();
+});
 
-  if(btnBack)  btnBack.addEventListener('click',  e=>{ e.stopPropagation(); if(vid) vid.currentTime = Math.max(0, vid.currentTime - 10); _nfShowControls(); });
-  if(btnFwd)   btnFwd.addEventListener('click',   e=>{ e.stopPropagation(); if(vid) vid.currentTime += 10; _nfShowControls(); });
-  if(selSpeed) selSpeed.addEventListener('change', e=>{ if(vid) vid.playbackRate = parseFloat(e.target.value); _nfShowControls(); });
-
-  /* Mostrar controles en PC (mousemove) y móvil (touchstart) sobre el modal */
-  if(ytMod){
-    ytMod.addEventListener('mousemove',  ()=> _nfShowControls());
-    ytMod.addEventListener('touchstart', ()=> _nfShowControls(), {passive:true});
-    /* Clic en el backdrop negro fuera del video → cerrar */
-    ytMod.addEventListener('click', e=>{ if(e.target===ytMod) closeYTModal(); });
-  }
-}, 0);
-
-/* ESC cierra modal */
-document.addEventListener('keydown', e=>{
-  const m = document.getElementById('yt-modal');
+document.addEventListener('keydown', function(e){
+  var m = document.getElementById('yt-modal');
   if(e.key==='Escape' && m && m.classList.contains('open')) closeYTModal();
 });
 
@@ -4874,21 +4797,9 @@ window.addEventListener('popstate', e => {
 });
 </script>
 
-<!-- ═══ VIDEO PLAYER MODAL ════════════════════════════════════ -->
-<!-- Botones fixed FUERA del modal para escapar del contexto del <video> en iOS -->
-<button id="close-player" title="Cerrar">✕</button>
-<div class="nf-top-controls" id="nf-top-controls">
-  <button class="nf-seek-btn" id="nf-back10" title="−10 s">−10s</button>
-  <button class="nf-seek-btn" id="nf-fwd10"  title="+10 s">+10s</button>
-  <select class="nf-speed" id="nf-speed">
-    <option value="0.5">0.5×</option>
-    <option value="1" selected>1×</option>
-    <option value="1.25">1.25×</option>
-    <option value="1.5">1.5×</option>
-    <option value="2">2×</option>
-  </select>
-</div>
+<!-- VIDEO PLAYER MODAL -->
 <div id="yt-modal" class="yt-modal">
+  <button id="close-player" title="Cerrar">✕</button>
   <div class="yt-modal-inner">
     <video id="netflix-player" playsinline preload="auto" controls></video>
   </div>
