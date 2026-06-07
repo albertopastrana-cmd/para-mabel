@@ -469,13 +469,13 @@
     .sched-custom-preview { flex:1;height:56px;border-radius:8px;border:1px solid rgba(255,255,255,.1);transition:background 200ms; }
 
     /* ═══ YOUTUBE PLAYER MODAL ═══════════════════════ */
-    .yt-modal { position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 300ms; }
-    .yt-modal.open { opacity:1;pointer-events:all; }
-    .yt-modal-inner { position:relative;width:min(960px,96vw);aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,.9); }
+    .yt-modal { position:fixed;inset:0;z-index:9000;background:#000;flex-direction:column;display:none; }
+    .yt-modal.open { display:flex; }
+    #player-topbar { width:100%;background:#111;display:flex;align-items:center;padding:10px 16px;flex-shrink:0; }
+    #close-player { display:block !important;pointer-events:auto !important;cursor:pointer !important;padding:15px;font-size:24px;color:#fff;background:none;border:none;line-height:1;font-family:inherit; }
+    #close-player:hover,#close-player:active { color:rgba(255,80,80,.9); }
+    .yt-modal-inner { flex:1;position:relative;width:100%;background:#000;overflow:hidden; }
     #netflix-player { position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain;background:#000; }
-    #close-player { display:none;position:absolute;top:20px;right:20px;z-index:999999;pointer-events:auto;cursor:pointer;width:44px;height:44px;border-radius:50%;background:rgba(10,18,28,.9);border:1.5px solid rgba(255,255,255,.25);color:#fff;font-size:20px;align-items:center;justify-content:center;transition:background 150ms; }
-    .yt-modal.open #close-player { display:flex; }
-    #close-player:hover, #close-player:active { background:rgba(220,30,30,.85); }
     /* Play overlay on video cards */
     .card-yt-badge { position:absolute;bottom:8px;left:8px;background:rgba(10,18,28,.75);backdrop-filter:blur(8px);border:1px solid rgba(134,152,170,.3);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:#8698AA;letter-spacing:.06em;pointer-events:none; }
     .card-yt-play-overlay { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);opacity:0;transition:opacity 200ms;border-radius:inherit;cursor:pointer; }
@@ -4723,6 +4723,7 @@ function openVideoModal(videoUrl, title){
   var modal = document.getElementById('yt-modal');
   var vid   = document.getElementById('netflix-player');
   if(!modal || !vid) return;
+  modal.style.display = 'flex';
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
   vid.src = videoUrl;
@@ -4734,21 +4735,20 @@ function openYTModal(id, title){ openVideoModal(id, title); }
 
 function closeYTModal(){
   var vid = document.getElementById('netflix-player');
-  if(vid){ vid.pause(); vid.removeAttribute('src'); vid.load(); }
+  if(vid){ vid.pause(); vid.src = ''; vid.load(); }
   var modal = document.getElementById('yt-modal');
-  if(modal) modal.classList.remove('open');
+  if(modal){ modal.style.display = 'none'; modal.classList.remove('open'); }
   document.body.style.overflow = '';
 }
 
-document.getElementById('close-player').addEventListener('click', function(e){
-  e.preventDefault();
-  e.stopPropagation();
-  closeYTModal();
-});
-
-document.getElementById('yt-modal').addEventListener('click', function(e){
-  if(e.target === document.getElementById('yt-modal')) closeYTModal();
-});
+var closeBtn = document.getElementById('close-player');
+if(closeBtn){
+  closeBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    closeYTModal();
+  });
+}
 
 document.addEventListener('keydown', function(e){
   var m = document.getElementById('yt-modal');
@@ -4799,7 +4799,9 @@ window.addEventListener('popstate', e => {
 
 <!-- VIDEO PLAYER MODAL -->
 <div id="yt-modal" class="yt-modal">
-  <button id="close-player" title="Cerrar">✕</button>
+  <div id="player-topbar">
+    <button id="close-player" title="Cerrar">&#x2715;</button>
+  </div>
   <div class="yt-modal-inner">
     <video id="netflix-player" playsinline preload="auto" controls></video>
   </div>
