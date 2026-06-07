@@ -472,11 +472,11 @@
     .yt-modal { position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 300ms; }
     .yt-modal.open { opacity:1;pointer-events:all; }
     .yt-modal-inner { position:relative;width:min(960px,96vw);aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,.9); }
-    .yt-close { position:absolute;top:16px;right:16px;z-index:10001;width:38px;height:38px;border-radius:50%;background:rgba(10,18,28,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 180ms; }
+    .yt-close { position:absolute !important;top:16px;right:16px;z-index:9999999 !important;width:38px;height:38px;border-radius:50%;background:rgba(10,18,28,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 180ms;pointer-events:auto !important; }
     .yt-close:hover { background:rgba(255,40,40,.7); }
-    #netflix-player { position:absolute;inset:0;width:100%;height:100%;border:none;display:block;object-fit:contain;background:#000;pointer-events:none;z-index:1; }
-    .yt-controls-layer { position:absolute;inset:0;z-index:9999;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(transparent 55%,rgba(0,0,0,.85) 100%);opacity:0;transition:opacity 260ms;pointer-events:none;cursor:pointer; }
-    .yt-controls-layer.visible { opacity:1;pointer-events:all; }
+    #netflix-player { position:absolute;inset:0;width:100%;height:100%;border:none;display:block;object-fit:contain;background:#000;z-index:1; }
+    .yt-controls-layer { position:absolute !important;inset:0;z-index:999999 !important;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(transparent 55%,rgba(0,0,0,.85) 100%);opacity:0;transition:opacity 260ms;pointer-events:none;cursor:pointer; }
+    .yt-controls-layer.visible { opacity:1;pointer-events:auto !important; }
     .yt-modal-inner:-webkit-full-screen { width:100vw;height:100vh;border-radius:0;aspect-ratio:unset;max-width:unset; }
     .yt-modal-inner:fullscreen { width:100vw;height:100vh;border-radius:0;aspect-ratio:unset;max-width:unset; }
     .yt-progress-wrap { padding:0 14px 8px;cursor:pointer; }
@@ -5013,7 +5013,7 @@ window.addEventListener('popstate', e => {
 <div id="yt-modal" class="yt-modal">
   <button class="yt-close" id="yt-close-btn" title="Cerrar">✕</button>
   <div class="yt-modal-inner">
-    <video id="netflix-player" playsinline preload="auto"></video>
+    <video id="netflix-player" playsinline preload="auto" controls></video>
     <div class="yt-controls-layer" id="yt-controls-layer">
       <div class="yt-progress-wrap">
         <div class="yt-progress-bg" id="yt-progress-bg">
