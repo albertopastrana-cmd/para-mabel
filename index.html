@@ -1249,6 +1249,16 @@
         <div class="sala-banner-dot"></div>
         <div class="sala-banner-text">Gestiona qué ve Mabel — oculta, reordena o renombra filas y tarjetas</div>
       </div>
+      <!-- Exportar / Importar datos -->
+      <div style="display:flex;gap:10px;margin:0 40px 20px;flex-wrap:wrap;">
+        <button id="export-data-btn" style="display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;background:rgba(134,152,170,.1);border:1px solid rgba(134,152,170,.3);color:#8698AA;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all 180ms;">
+          📤 Exportar datos
+        </button>
+        <label id="import-data-label" style="display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;background:rgba(134,152,170,.1);border:1px solid rgba(134,152,170,.3);color:#8698AA;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all 180ms;">
+          📥 Importar datos
+          <input type="file" id="import-data-input" accept=".json" style="display:none;">
+        </label>
+      </div>
       <div id="editor-container"><div class="editor-row-block">
       <div class="editor-row-header">
         <span class="editor-row-emoji">⭐</span>
@@ -2516,6 +2526,42 @@ function buildEditor(){
   addRowBtn.addEventListener('click', openNewRowModal);
   container.appendChild(addRowBtn);
 }
+
+/* ── EXPORTAR / IMPORTAR DATOS ──────────────────────────────────── */
+document.getElementById('export-data-btn').addEventListener('click', ()=>{
+  const KEYS = ['hflix_custom','hflix_editor','hflix_sched_dates','hflix_sched_extra',
+                'hflix_sched_migrated','hflix_sched_data','hflix_custom_rows',
+                'hflix_mylist','hflix_chapters','hflix_nav_session'];
+  const snapshot = {};
+  KEYS.forEach(k=>{ const v=localStorage.getItem(k); if(v) snapshot[k]=v; });
+  /* Capturar también claves dinámicas hflix_custom_* */
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k && k.startsWith('hflix_') && !snapshot[k]) snapshot[k]=localStorage.getItem(k);
+  }
+  const blob=new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='mabel-datos-'+(new Date().toISOString().slice(0,10))+'.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('✅ Datos exportados correctamente');
+});
+
+document.getElementById('import-data-input').addEventListener('change', e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      Object.entries(data).forEach(([k,v])=>{ try{localStorage.setItem(k,v);}catch{} });
+      showToast('✅ Datos importados — recargando...');
+      setTimeout(()=>location.reload(), 1200);
+    } catch{ showToast('⚠️ Archivo inválido'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+});
 
 function renderEditorCards(key,listEl){
   listEl.innerHTML='';
