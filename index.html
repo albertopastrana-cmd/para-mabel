@@ -472,29 +472,18 @@
     .yt-modal { position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 300ms; }
     .yt-modal.open { opacity:1;pointer-events:all; }
     .yt-modal-inner { position:relative;width:min(960px,96vw);aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,.9); }
-    .yt-close { position:absolute !important;top:16px;right:16px;z-index:9999999 !important;width:38px;height:38px;border-radius:50%;background:rgba(10,18,28,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 180ms;pointer-events:auto !important; }
-    .yt-close:hover { background:rgba(255,40,40,.7); }
-    #netflix-player { position:absolute;inset:0;width:100%;height:100%;border:none;display:block;object-fit:contain;background:#000;z-index:1; }
-    .yt-controls-layer { position:absolute !important;inset:0;z-index:999999 !important;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(transparent 55%,rgba(0,0,0,.85) 100%);opacity:0;transition:opacity 260ms;pointer-events:none;cursor:pointer; }
-    .yt-controls-layer.visible { opacity:1;pointer-events:auto !important; }
-    .yt-modal-inner:-webkit-full-screen { width:100vw;height:100vh;border-radius:0;aspect-ratio:unset;max-width:unset; }
-    .yt-modal-inner:fullscreen { width:100vw;height:100vh;border-radius:0;aspect-ratio:unset;max-width:unset; }
-    .yt-progress-wrap { padding:0 14px 8px;cursor:pointer; }
-    .yt-progress-bg { position:relative;height:4px;background:rgba(255,255,255,.22);border-radius:2px;transition:height 150ms; }
-    .yt-progress-bg:hover { height:6px; }
-    .yt-progress-fill { height:100%;background:#8698AA;border-radius:2px;pointer-events:none; }
-    .yt-progress-thumb { position:absolute;top:50%;right:-6px;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:#fff;pointer-events:none;opacity:0;transition:opacity 150ms; }
-    .yt-progress-bg:hover .yt-progress-thumb { opacity:1; }
-    .yt-controls-bar { display:flex;align-items:center;gap:8px;padding:0 12px 14px;flex-wrap:nowrap; }
-    .yt-btn { background:none;border:none;color:#fff;cursor:pointer;font-size:18px;padding:5px 7px;border-radius:7px;transition:background 140ms;line-height:1;font-family:inherit;flex-shrink:0; }
-    .yt-btn:hover { background:rgba(255,255,255,.12); }
-    .yt-time { font-size:11px;color:rgba(255,255,255,.65);font-family:inherit;flex-shrink:0;min-width:90px; }
-    .yt-spacer { flex:1; }
-    .yt-volume-wrap { display:flex;align-items:center;gap:6px; }
-    .yt-vol-slider { width:68px;height:3px;accent-color:#8698AA;cursor:pointer; }
-    .yt-speed-select { background:rgba(13,26,42,.85);border:1px solid rgba(134,152,170,.3);color:#8698AA;font-family:inherit;font-size:11px;font-weight:600;padding:4px 7px;border-radius:7px;cursor:pointer;outline:none; }
-    .yt-speed-select option { background:#0D1A2A; }
-    /* Play overlay on cards that have a YouTube video */
+    /* ── Video modal ───────────────────────────────────────────── */
+    #netflix-player { position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain;background:#000; }
+    /* overlay pointer-events:none — no tapa los controles nativos */
+    .nf-overlay { position:absolute;inset:0;z-index:999999;pointer-events:none; }
+    .nf-close { position:absolute;top:12px;right:12px;pointer-events:auto !important;width:36px;height:36px;border-radius:50%;background:rgba(10,18,28,.85);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 150ms; }
+    .nf-close:hover, .nf-close:active { background:rgba(220,30,30,.8); }
+    .nf-seek-wrap { position:absolute;top:12px;left:12px;display:flex;gap:8px;align-items:center;pointer-events:none; }
+    .nf-seek-btn { pointer-events:auto !important;background:rgba(10,18,28,.75);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:700;font-family:inherit;padding:6px 11px;border-radius:8px;cursor:pointer;transition:background 140ms; }
+    .nf-seek-btn:hover, .nf-seek-btn:active { background:rgba(134,152,170,.35); }
+    .nf-speed { pointer-events:auto !important;background:rgba(10,18,28,.85);border:1px solid rgba(255,255,255,.18);color:#fff;font-family:inherit;font-size:12px;font-weight:700;padding:5px 8px;border-radius:8px;cursor:pointer;outline:none; }
+    .nf-speed option { background:#0D1A2A; }
+    /* Play overlay on video cards */
     .card-yt-badge { position:absolute;bottom:8px;left:8px;background:rgba(10,18,28,.75);backdrop-filter:blur(8px);border:1px solid rgba(134,152,170,.3);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:#8698AA;letter-spacing:.06em;pointer-events:none; }
     .card-yt-play-overlay { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);opacity:0;transition:opacity 200ms;border-radius:inherit;cursor:pointer; }
     .hbo-card:hover .card-yt-play-overlay { opacity:1; }
@@ -4765,54 +4754,19 @@ document.getElementById('np-close').addEventListener('click', () => {
 })();
 
 /* ── HTML5 VIDEO PLAYER ─────────────────────────────────────────── */
-let ytControlsTimeout = null;
-
-function fmtTime(s){
-  if(!s || isNaN(s)) return '0:00';
-  const m=Math.floor(s/60), ss=Math.floor(s%60);
-  return m+':'+(ss<10?'0':'')+ss;
-}
-
 function _getVid(){ return document.getElementById('netflix-player'); }
-
-function updateYTPlayBtn(){
-  const vid = _getVid(), btn = document.getElementById('yt-play-btn');
-  if(!vid || !btn) return;
-  btn.textContent = vid.paused ? '▶' : '⏸';
-}
-
-function showYTControls(){
-  const layer = document.getElementById('yt-controls-layer');
-  if(!layer) return;
-  layer.classList.add('visible');
-  clearTimeout(ytControlsTimeout);
-  ytControlsTimeout = setTimeout(()=> layer.classList.remove('visible'), 3000);
-}
 
 function openVideoModal(videoUrl, title){
   const modal = document.getElementById('yt-modal');
   const vid   = _getVid();
   if(!modal || !vid) return;
-
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
-
-  /* reset controles */
-  document.getElementById('yt-progress-fill').style.width = '0%';
-  document.getElementById('yt-time').textContent = '0:00 / 0:00';
-  document.getElementById('yt-play-btn').textContent = '▶';
-  document.getElementById('yt-mute-btn').textContent = '🔊';
-  document.getElementById('yt-vol-slider').value = '100';
-  document.getElementById('yt-speed-select').value = '1';
-  document.getElementById('yt-controls-layer').style.display = '';
-
   vid.src = videoUrl;
   vid.load();
   vid.play().catch(()=>{});
-  showYTControls();
 }
 
-/* Alias para compatibilidad con llamadas existentes que pasen un youtubeId */
 function openYTModal(id, title){ openVideoModal(id, title); }
 
 function closeYTModal(){
@@ -4822,146 +4776,25 @@ function closeYTModal(){
   document.body.style.overflow = '';
 }
 
-/* Controles — diferidos con setTimeout para que el HTML del modal esté en el DOM */
+/* Botones extra del overlay — diferidos para que el HTML esté en el DOM */
 setTimeout(()=>{
-  const ytClose  = document.getElementById('yt-close-btn');
+  const vid     = _getVid();
+  const btnClose = document.getElementById('yt-close-btn');
+  const btnBack  = document.getElementById('nf-back10');
+  const btnFwd   = document.getElementById('nf-fwd10');
+  const selSpeed = document.getElementById('nf-speed');
   const ytMod    = document.getElementById('yt-modal');
-  const ytPlayB  = document.getElementById('yt-play-btn');
-  const ytBack   = document.getElementById('yt-back10');
-  const ytFwd    = document.getElementById('yt-fwd10');
-  const ytMute   = document.getElementById('yt-mute-btn');
-  const ytVol    = document.getElementById('yt-vol-slider');
-  const ytSpeed  = document.getElementById('yt-speed-select');
-  const _ytPB    = document.getElementById('yt-progress-bg');
-  const vid      = _getVid();
 
-  if(ytClose) ytClose.addEventListener('click', closeYTModal);
+  if(btnClose) btnClose.addEventListener('click', closeYTModal);
+  if(btnBack)  btnBack.addEventListener('click',  ()=>{ if(vid) vid.currentTime = Math.max(0, vid.currentTime - 10); });
+  if(btnFwd)   btnFwd.addEventListener('click',   ()=>{ if(vid) vid.currentTime += 10; });
+  if(selSpeed) selSpeed.addEventListener('change', e=>{ if(vid) vid.playbackRate = parseFloat(e.target.value); });
+
   /* Clic en el backdrop negro fuera del video → cerrar */
   if(ytMod) ytMod.addEventListener('click', e=>{ if(e.target===ytMod) closeYTModal(); });
-  /* Clic en el área del video (cuando controles no visibles) → mostrar controles + toggle play */
-  if(ytInner) ytInner.addEventListener('click', e=>{
-    const tag = (e.target.tagName||'').toLowerCase();
-    if(['button','input','select'].includes(tag) || e.target.closest('button,input,select')) return;
-    const layer = document.getElementById('yt-controls-layer');
-    if(layer && !layer.classList.contains('visible')){ showYTControls(); return; }
-    if(!vid) return;
-    vid.paused ? vid.play().catch(()=>{}) : vid.pause();
-    showYTControls();
-  });
-
-  if(ytPlayB) ytPlayB.addEventListener('click', ()=>{
-    if(!vid) return;
-    vid.paused ? vid.play().catch(()=>{}) : vid.pause();
-    setTimeout(updateYTPlayBtn, 80);
-  });
-  if(ytBack) ytBack.addEventListener('click', ()=>{
-    if(!vid) return; vid.currentTime = Math.max(0, vid.currentTime - 10);
-  });
-  if(ytFwd) ytFwd.addEventListener('click', ()=>{
-    if(!vid) return; vid.currentTime = Math.min(vid.duration||0, vid.currentTime + 10);
-  });
-  if(ytMute) ytMute.addEventListener('click', ()=>{
-    if(!vid) return;
-    vid.muted = !vid.muted;
-    ytMute.textContent = vid.muted ? '🔇' : '🔊';
-  });
-  if(ytVol) ytVol.addEventListener('input', e=>{
-    if(!vid) return;
-    const v = parseInt(e.target.value) / 100;
-    vid.volume = v; vid.muted = v === 0;
-    if(ytMute) ytMute.textContent = v === 0 ? '🔇' : '🔊';
-  });
-  if(ytSpeed) ytSpeed.addEventListener('change', e=>{
-    if(!vid) return; vid.playbackRate = parseFloat(e.target.value);
-  });
-
-  /* Sincronizar barra de progreso con timeupdate nativo */
-  if(vid){
-    vid.addEventListener('timeupdate', ()=>{
-      const cur = vid.currentTime, dur = vid.duration||0;
-      const fill = document.getElementById('yt-progress-fill');
-      const time = document.getElementById('yt-time');
-      if(fill) fill.style.width = (dur > 0 ? cur/dur*100 : 0) + '%';
-      if(time) time.textContent = fmtTime(cur) + ' / ' + fmtTime(dur);
-    });
-    vid.addEventListener('play',  updateYTPlayBtn);
-    vid.addEventListener('pause', updateYTPlayBtn);
-    vid.addEventListener('ended', updateYTPlayBtn);
-  }
-
-  /* Barra de progreso — seek por click/drag */
-  let _ytDrag = false;
-  function _ytSeek(e){
-    if(!vid || !_ytPB) return;
-    const r = _ytPB.getBoundingClientRect();
-    const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
-    const pct = Math.max(0, Math.min(1, x / r.width));
-    if(vid.duration) vid.currentTime = pct * vid.duration;
-  }
-  if(_ytPB){
-    _ytPB.addEventListener('mousedown',  e=>{ _ytDrag=true; _ytSeek(e); });
-    _ytPB.addEventListener('touchstart', e=>_ytSeek(e), {passive:true});
-  }
-  document.addEventListener('mousemove', e=>{ if(_ytDrag) _ytSeek(e); });
-  document.addEventListener('mouseup',   ()=>{ _ytDrag=false; });
-
-  /* Clic en el área libre de la capa visible → toggle play/pause */
-  const ytLayer = document.getElementById('yt-controls-layer');
-  if(ytLayer) ytLayer.addEventListener('click', e=>{
-    const tag = (e.target.tagName||'').toLowerCase();
-    if(['button','input','select'].includes(tag) || e.target.closest('button,input,select')) return;
-    if(!vid) return;
-    vid.paused ? vid.play().catch(()=>{}) : vid.pause();
-    showYTControls();
-  });
-
-  /* Pantalla completa */
-  const ytFS  = document.getElementById('yt-fs-btn');
-  const ytInner = document.querySelector('.yt-modal-inner');
-  function toggleFS(){
-    if(!ytInner) return;
-    if(!document.fullscreenElement && !document.webkitFullscreenElement){
-      const req = ytInner.requestFullscreen || ytInner.webkitRequestFullscreen;
-      if(req) req.call(ytInner);
-    } else {
-      const ex = document.exitFullscreen || document.webkitExitFullscreen;
-      if(ex) ex.call(document);
-    }
-  }
-  if(ytFS) ytFS.addEventListener('click', toggleFS);
-  document.addEventListener('fullscreenchange',        ()=>{ if(ytFS) ytFS.textContent = document.fullscreenElement ? '✕⛶' : '⛶'; });
-  document.addEventListener('webkitfullscreenchange',  ()=>{ if(ytFS) ytFS.textContent = document.webkitFullscreenElement ? '✕⛶' : '⛶'; });
-  /* Doble clic en la capa también activa fullscreen */
-  if(ytLayer) ytLayer.addEventListener('dblclick', e=>{
-    const tag = e.target.tagName.toLowerCase();
-    if(['button','input','select'].includes(tag) || e.target.closest('button,input,select')) return;
-    toggleFS();
-  });
-
-  /* Picture-in-Picture */
-  const ytPiP = document.getElementById('yt-pip-btn');
-  if(ytPiP && vid){
-    ytPiP.addEventListener('click', async ()=>{
-      try{
-        if(document.pictureInPictureElement) await document.exitPictureInPicture();
-        else await vid.requestPictureInPicture();
-      }catch{}
-    });
-    vid.addEventListener('enterpictureinpicture', ()=>{ ytPiP.textContent='⊠'; });
-    vid.addEventListener('leavepictureinpicture', ()=>{ ytPiP.textContent='⧉'; });
-  }
-
-  /* Auto-mostrar controles — mousemove + mouseenter + touchstart */
-  if(ytMod){
-    ytMod.addEventListener('mouseenter', showYTControls);
-    ytMod.addEventListener('mousemove',  showYTControls);
-    ytMod.addEventListener('touchstart', showYTControls, {passive:true});
-    /* En celular: toque en la capa muestra controles aunque ya estén visibles */
-    ytMod.addEventListener('touchend', ()=>{ clearTimeout(ytControlsTimeout); ytControlsTimeout = setTimeout(()=>{ const l=document.getElementById('yt-controls-layer'); if(l) l.classList.remove('visible'); }, 3000); });
-  }
 }, 0);
 
-/* ESC cierra modal — no necesita diferirse porque usa document */
+/* ESC cierra modal */
 document.addEventListener('keydown', e=>{
   const m=document.getElementById('yt-modal');
   if(e.key==='Escape' && m && m.classList.contains('open')) closeYTModal();
@@ -5011,34 +4844,21 @@ window.addEventListener('popstate', e => {
 
 <!-- ═══ VIDEO PLAYER MODAL ════════════════════════════════════ -->
 <div id="yt-modal" class="yt-modal">
-  <button class="yt-close" id="yt-close-btn" title="Cerrar">✕</button>
   <div class="yt-modal-inner">
     <video id="netflix-player" playsinline preload="auto" controls></video>
-    <div class="yt-controls-layer" id="yt-controls-layer">
-      <div class="yt-progress-wrap">
-        <div class="yt-progress-bg" id="yt-progress-bg">
-          <div class="yt-progress-fill" id="yt-progress-fill" style="width:0%"></div>
-          <div class="yt-progress-thumb"></div>
-        </div>
-      </div>
-      <div class="yt-controls-bar">
-        <button class="yt-btn" id="yt-play-btn" title="Play / Pausa">▶</button>
-        <button class="yt-btn" id="yt-back10" title="−10 s">⏪</button>
-        <button class="yt-btn" id="yt-fwd10"  title="+10 s">⏩</button>
-        <span class="yt-time" id="yt-time">0:00 / 0:00</span>
-        <div class="yt-spacer"></div>
-        <div class="yt-volume-wrap">
-          <button class="yt-btn" id="yt-mute-btn" title="Silencio">🔊</button>
-          <input type="range" class="yt-vol-slider" id="yt-vol-slider" min="0" max="100" value="100">
-        </div>
-        <select class="yt-speed-select" id="yt-speed-select">
+    <!-- overlay mínimo: solo botones extra, no tapa controles nativos -->
+    <div class="nf-overlay" id="nf-overlay">
+      <button class="nf-close" id="yt-close-btn" title="Cerrar">✕</button>
+      <div class="nf-seek-wrap">
+        <button class="nf-seek-btn" id="nf-back10" title="−10 s">−10s</button>
+        <button class="nf-seek-btn" id="nf-fwd10"  title="+10 s">+10s</button>
+        <select class="nf-speed" id="nf-speed">
           <option value="0.5">0.5×</option>
           <option value="1" selected>1×</option>
+          <option value="1.25">1.25×</option>
           <option value="1.5">1.5×</option>
           <option value="2">2×</option>
         </select>
-        <button class="yt-btn" id="yt-pip-btn"   title="Picture-in-Picture" style="font-size:15px">⧉</button>
-        <button class="yt-btn" id="yt-fs-btn"    title="Pantalla completa"  style="font-size:15px">⛶</button>
       </div>
     </div>
   </div>
