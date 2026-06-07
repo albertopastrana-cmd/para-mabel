@@ -475,8 +475,10 @@
     .yt-close { position:absolute;top:12px;right:12px;z-index:10000;width:36px;height:36px;border-radius:50%;background:rgba(10,18,28,.75);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 180ms; }
     .yt-close:hover { background:rgba(255,255,255,.18); }
     #netflix-player { position:absolute;inset:0;width:100%;height:100%;border:none;display:block;object-fit:contain;background:#000;pointer-events:none; }
-    .yt-controls-layer { position:absolute;inset:0;z-index:9999;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(transparent 55%,rgba(0,0,0,.8) 100%);opacity:0;transition:opacity 260ms;pointer-events:all; }
+    .yt-controls-layer { position:absolute;inset:0;z-index:9999;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(transparent 55%,rgba(0,0,0,.8) 100%);opacity:0;transition:opacity 260ms;pointer-events:all;cursor:pointer; }
     .yt-controls-layer.visible { opacity:1; }
+    .yt-modal-inner:-webkit-full-screen { width:100vw;height:100vh;border-radius:0;aspect-ratio:unset;max-width:unset; }
+    .yt-modal-inner:fullscreen { width:100vw;height:100vh;border-radius:0;aspect-ratio:unset;max-width:unset; }
     .yt-progress-wrap { padding:0 14px 8px;cursor:pointer; }
     .yt-progress-bg { position:relative;height:4px;background:rgba(255,255,255,.22);border-radius:2px;transition:height 150ms; }
     .yt-progress-bg:hover { height:6px; }
@@ -4902,10 +4904,49 @@ setTimeout(()=>{
     showYTControls();
   });
 
-  /* Auto-mostrar controles */
+  /* Pantalla completa */
+  const ytFS  = document.getElementById('yt-fs-btn');
+  const ytInner = document.querySelector('.yt-modal-inner');
+  function toggleFS(){
+    if(!ytInner) return;
+    if(!document.fullscreenElement && !document.webkitFullscreenElement){
+      const req = ytInner.requestFullscreen || ytInner.webkitRequestFullscreen;
+      if(req) req.call(ytInner);
+    } else {
+      const ex = document.exitFullscreen || document.webkitExitFullscreen;
+      if(ex) ex.call(document);
+    }
+  }
+  if(ytFS) ytFS.addEventListener('click', toggleFS);
+  document.addEventListener('fullscreenchange',        ()=>{ if(ytFS) ytFS.textContent = document.fullscreenElement ? '✕⛶' : '⛶'; });
+  document.addEventListener('webkitfullscreenchange',  ()=>{ if(ytFS) ytFS.textContent = document.webkitFullscreenElement ? '✕⛶' : '⛶'; });
+  /* Doble clic en la capa también activa fullscreen */
+  if(ytLayer) ytLayer.addEventListener('dblclick', e=>{
+    const tag = e.target.tagName.toLowerCase();
+    if(['button','input','select'].includes(tag) || e.target.closest('button,input,select')) return;
+    toggleFS();
+  });
+
+  /* Picture-in-Picture */
+  const ytPiP = document.getElementById('yt-pip-btn');
+  if(ytPiP && vid){
+    ytPiP.addEventListener('click', async ()=>{
+      try{
+        if(document.pictureInPictureElement) await document.exitPictureInPicture();
+        else await vid.requestPictureInPicture();
+      }catch{}
+    });
+    vid.addEventListener('enterpictureinpicture', ()=>{ ytPiP.textContent='⊠'; });
+    vid.addEventListener('leavepictureinpicture', ()=>{ ytPiP.textContent='⧉'; });
+  }
+
+  /* Auto-mostrar controles — mousemove + mouseenter + touchstart */
   if(ytMod){
+    ytMod.addEventListener('mouseenter', showYTControls);
     ytMod.addEventListener('mousemove',  showYTControls);
     ytMod.addEventListener('touchstart', showYTControls, {passive:true});
+    /* En celular: toque en la capa muestra controles aunque ya estén visibles */
+    ytMod.addEventListener('touchend', ()=>{ clearTimeout(ytControlsTimeout); ytControlsTimeout = setTimeout(()=>{ const l=document.getElementById('yt-controls-layer'); if(l) l.classList.remove('visible'); }, 3000); });
   }
 }, 0);
 
@@ -4985,6 +5026,8 @@ window.addEventListener('popstate', e => {
           <option value="1.5">1.5×</option>
           <option value="2">2×</option>
         </select>
+        <button class="yt-btn" id="yt-pip-btn"   title="Picture-in-Picture" style="font-size:15px">⧉</button>
+        <button class="yt-btn" id="yt-fs-btn"    title="Pantalla completa"  style="font-size:15px">⛶</button>
       </div>
     </div>
   </div>
