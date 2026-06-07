@@ -1606,7 +1606,7 @@ const TOP10 = [
 ];
 const MOMENTS = [
   { emoji:'😂', title:'La Cara de "¿En Serio?"', sub:'Comedia · Episodio más visto', bg:'radial-gradient(ellipse at 40% 30%,#2d1b69 0%,#0d0d0d 100%)' },
-  { emoji:'🤪', title:'Las Fotos de Prueba',      sub:'Documental · 23 temporadas',  bg:'radial-gradient(ellipse at 60% 20%,#5c1700 0%,#0d0d0d 100%)' },
+  { emoji:'🤪', title:'Las Fotos de Prueba',      sub:'Documental · 23 temporadas',  bg:'radial-gradient(ellipse at 60% 20%,#5c1700 0%,#0d0d0d 100%)', videoUrl:'https://github.com/albertopastrana-cmd/para-mabel/releases/download/v1.0/copy_0E3253D2-51A5-4BC4-9F7F-0C6959A47E58.mov' },
   { emoji:'😴', title:'La Siesta de 5 Min',       sub:'Drama · 3 horas',             bg:'radial-gradient(ellipse at 30% 50%,#001436 0%,#0d0d0d 100%)' },
   { emoji:'🍕', title:'La Discusión Pizza',       sub:'Gastronomía · 1 temporada',   bg:'radial-gradient(ellipse at 50% 30%,#5c0000 0%,#0d0d0d 100%)' },
   { emoji:'🤣', title:'Memes Privados',           sub:'Comedia · Exclusivo',         bg:'radial-gradient(ellipse at 40% 40%,#003b00 0%,#0d0d0d 100%)' },
@@ -3583,7 +3583,6 @@ function renderChapterGrid(rowKey, season){
        </div>`;
     card.addEventListener('click', () => {
       if(ch.videoUrl)   openVideoModal(ch.videoUrl, ch.title||'');
-      else if(ch.videoUrl) window.open(ch.videoUrl, '_blank');
       else openLetterModal({ title: ch.title, letter: ch.desc, synopsis: ch.desc });
     });
     grid.appendChild(card);
